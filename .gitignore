@@ -2,4 +2,6 @@
 
 venv
 
-alembic/versions
+alembic/versions/
+
+media
