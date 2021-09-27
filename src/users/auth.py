@@ -1,7 +1,8 @@
+import logging
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, HTTPBearer
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
@@ -20,7 +21,7 @@ class Token(BaseModel):
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = HTTPBearer()
 
 
 def verify_password(plain_password, hashed_password):
@@ -40,7 +41,7 @@ def create_access_token(data: dict):
 
 
 def authentication_user(db: Session, username: str, password: str):
-    users = db.query(User).filter(User.username == username).all()
+    users = db.query(User).filter(User.username == username).all()  # TODO find other solution
     for user in users:
         return user if verify_password(password, user.password) else None
 
