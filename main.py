@@ -1,3 +1,5 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI, Request, Response, APIRouter
 
@@ -5,6 +7,10 @@ from core.db import database
 from core.config import settings
 from src.users.api import users_app
 from src.video.api import video_app
+
+
+logging.basicConfig(level=logging.DEBUG, format='DateTime: %(asctime)s :: %(levelname)s :: Msg --> %(message)s')
+
 
 app = FastAPI()
 
