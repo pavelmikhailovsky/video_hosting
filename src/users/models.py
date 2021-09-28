@@ -15,5 +15,6 @@ class User(Base):
     create_at = Column(DateTime(timezone=True), server_default=func.now())
     is_staff = Column(Boolean, server_default='f')
     is_active = Column(Boolean, server_default='t')
+    video_path = Column(String, server_default='')
 
-    video = relationship(Video)
+    video = relationship("Video", backref='user')
