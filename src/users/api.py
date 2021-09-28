@@ -28,3 +28,8 @@ async def update_user(db: Session = Depends(get_db),
                       data: schemas.UserUpdate = Depends(),
                       token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
     return service.UpdateUser(db, data, token).returning_result()
+
+
+@users_app.get('/{user_id}')
+async def get_user_by_id(user_id: int, db: Session = Depends(get_db), token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
+    return service.user_by_id(db, user_id, token)
