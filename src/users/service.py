@@ -40,6 +40,7 @@ def get_current_user(db: Session, token: HTTPAuthorizationCredentials):
     if not users:
         raise credentials_exception
 
+    # return users[0]
     for user in users:
         return user
 
@@ -54,6 +55,10 @@ def create_user(db: Session, data: schemas.UserInDB):
         return db_user
     except IntegrityError:
         return {'detail': f"Username '{data.username}' is was taken"}
+
+
+def user_by_id(db: Session, user_id: int, token: HTTPAuthorizationCredentials):
+    return {}
 
 
 class UpdateUser:
