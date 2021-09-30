@@ -16,7 +16,8 @@ from ..users.models import User
 
 def get_list_video_service(db: Session, token: HTTPAuthorizationCredentials):
     user: User = get_current_user(db, token)
-    return db.query(User).options(lazyload(user.video)).all()
+    video = db.query(Video).options(lazyload(user.video)).all()
+    return video
 
 
 def video_description_service(db: Session, video_description: UploadVideo, token: HTTPAuthorizationCredentials):
@@ -32,19 +33,19 @@ def video_description_service(db: Session, video_description: UploadVideo, token
 
 
 def recording_video(db: Session, video: UploadFile, token: HTTPAuthorizationCredentials):
+    user = get_current_user(db, token)
     if video.content_type == 'video/mp4':
-        path = f'{os.getcwd()}/media/video/1/'
+        path = f'{os.getcwd()}/media/video/{user.id}/'
         if not os.path.exists(path):
             os.makedirs(path)
         path = f'{path}{uuid4()}.mp4'
         with open(f'{path}', 'wb') as f:
             shutil.copyfileobj(video.file, f)
-        writing_video_path(db, token, path)
+        writing_video_path(db, user, path)
         return path
 
 
-def writing_video_path(db: Session, token: HTTPAuthorizationCredentials, path: str):
-    user = get_current_user(db, token)
+def writing_video_path(db: Session, user: User, path: str):
     try:
         if not user.video_path:
             user.video_path = path

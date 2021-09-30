@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from starlette.requests import Request
 
 from core.db import get_db
 from . import schemas, service

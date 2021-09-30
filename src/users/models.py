@@ -17,4 +17,4 @@ class User(Base):
     is_active = Column(Boolean, server_default='t')
     video_path = Column(String, server_default='')
 
-    video = relationship("Video", backref='user')
+    video = relationship("Video", back_populates='video')

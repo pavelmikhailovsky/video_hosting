@@ -36,13 +36,11 @@ def get_current_user(db: Session, token: HTTPAuthorizationCredentials):
     if username is None:
         raise credentials_exception
 
-    users = db.query(User).filter(User.username == username).all()  # TODO find other solution
-    if not users:
+    user = db.query(User).filter(User.username == username).first()  # TODO find other solution
+    if not user:
         raise credentials_exception
 
-    # return users[0]
-    for user in users:
-        return user
+    return user
 
 
 def create_user(db: Session, data: schemas.UserInDB):
@@ -58,7 +56,8 @@ def create_user(db: Session, data: schemas.UserInDB):
 
 
 def user_by_id(db: Session, user_id: int, token: HTTPAuthorizationCredentials):
-    return {}
+    _ = get_current_user(db, token)
+    return db.query(User).filter(User.id == user_id).first()  # TODO find other solution
 
 
 class UpdateUser:
@@ -84,7 +83,7 @@ class UpdateUser:
         return result
 
     def new_username(self, user):
-        unique_username = self.db.query(User).filter(User.username == self.data.new_username).all()  # TODO find other solutuib
+        unique_username = self.db.query(User).filter(User.username == self.data.new_username).first()  # TODO find other solution
         if unique_username:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

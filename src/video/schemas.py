@@ -16,7 +16,7 @@ class Video(BaseModel):
     id: int
     address: str
     description: str
-    user_id: int
+    uploader: User
 
     class Config:
         orm_mode = True

@@ -1,7 +1,13 @@
 .idea
 
+__pycache__
+
 venv
 
 alembic/versions/
 
 media
+
+.coverage
+
+.pytest_cache

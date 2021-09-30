@@ -19,6 +19,9 @@ class UserInDB(BaseModel):
     username: str
     password: str
 
+    class Config:
+        orm_mode = True
+
 
 class UserTokenLogin(BaseModel):
     username: str
