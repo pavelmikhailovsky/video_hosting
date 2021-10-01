@@ -1,4 +1,5 @@
 import typing as t
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -14,6 +15,7 @@ class VideoBase(BaseModel):
 
 class Video(BaseModel):
     id: int
+    time_uploading: datetime
     address: str
     description: str
     uploader: User

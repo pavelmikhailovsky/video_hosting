@@ -50,7 +50,7 @@ def create_user(db: Session, data: schemas.UserInDB):
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
-        return db_user
+        return {'username': data.username, 'password': data.password}
     except IntegrityError:
         return {'detail': f"Username '{data.username}' is was taken"}
 

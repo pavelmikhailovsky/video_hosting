@@ -15,8 +15,8 @@ from ..users.models import User
 
 
 def get_list_video_service(db: Session, token: HTTPAuthorizationCredentials):
-    user: User = get_current_user(db, token)
-    video = db.query(Video).options(lazyload(user.video)).all()
+    _ = get_current_user(db, token)
+    video = db.query(Video).all()
     return video
 
 
