@@ -1,4 +1,4 @@
-from fastapi import params
+import ctypes
 import pytest
 from httpx import AsyncClient
 
@@ -11,18 +11,7 @@ app.dependency_overrides[get_db] = test_db.override_get_db
 
 url = f'http://127.0.0.1:8001{settings.API_V1_STR}/users'
 
-class Token:
-    _token = 'something token'
-
-    def __init__(self, token) -> None:
-        self._token = token
-
-    @classmethod
-    def get_token(cls):
-        return cls._token
-
-
-token = ''
+token = ctypes.c_wchar_p(' ')
 
 
 @pytest.mark.asyncio
@@ -48,7 +37,7 @@ async def test_login():
     assert correct_response.status_code == 200
     assert incorrect_response.status_code == 401
     data = correct_response.json()
-    token = Token(f'{data["type_token"]} {data["access_token"]}')
+    token.value = f'{data["type_token"]} {data["access_token"]}'
     incorrect_data = incorrect_response.json()
     assert incorrect_data['detail'] == 'Incorrect username or password'
 
@@ -57,13 +46,12 @@ async def test_login():
 async def test_user_info_about_me():
     async with AsyncClient(app=app, base_url=url) as async_client:
         correct_response = await async_client.get(
-            '/me', headers={'Authorization': Token.get_token()}
+            '/me', headers={'Authorization': token.value}
         )
-        print(Token.get_token())
         incorrect_response = await async_client.get(
-            '/me', headers={'Authorization': f'{Token.get_token()}abc'}
+            '/me', headers={'Authorization': f'{token.value}abc'}
         )
     assert correct_response.status_code == 200
-    assert incorrect_response.status_code == 422
+    assert incorrect_response.status_code == 401
     data = correct_response.json()
     assert data['username'] == 'testuser'

@@ -28,9 +28,9 @@ async def upload_video(video: UploadFile = File(...),
     return service.recording_video(db, video, token)
 
 
-@video_app.get('/stream_video')
-def stream_video(db: Session = Depends(get_db), token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
-    return StreamingResponse(service.iterable_video(db, token), media_type='video/mp4')
+@video_app.get('/stream_video/{video_id}')
+def stream_video(video_id: int, db: Session = Depends(get_db), token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
+    return StreamingResponse(service.iterable_video(db, token, video_id), media_type='video/mp4')
 
 
 @video_app.get('', response_model=t.List[schemas.Video])

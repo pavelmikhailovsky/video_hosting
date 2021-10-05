@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from fastapi import UploadFile, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session, lazyload
+from sqlalchemy.orm import Session
 from starlette import status
 
 from src.users.service import get_current_user
@@ -59,7 +59,10 @@ def writing_video_path(db: Session, user: User, path: str):
         db.commit()
 
 
-def iterable_video(db: Session, token: HTTPAuthorizationCredentials):
-    string = ''
-    with open(string, 'rb') as video:
+def iterable_video(db: Session, token: HTTPAuthorizationCredentials, video_id: int):
+    _ = get_current_user(db, token)
+    video = db.query(Video).filter(Video.id == video_id).first()
+    if not video:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Video is not finded')
+    with open(video.address, 'rb') as video:
         yield from video

@@ -41,8 +41,8 @@ def create_access_token(data: dict):
 
 
 def authentication_user(db: Session, username: str, password: str):
-    users = db.query(User).filter(User.username == username).all()  # TODO find other solution
-    for user in users:
+    user = db.query(User).filter(User.username == username).first()  # TODO find other solution
+    if user:
         return user if verify_password(password, user.password) else None
 
 

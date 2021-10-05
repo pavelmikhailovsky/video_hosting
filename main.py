@@ -1,16 +1,17 @@
 import logging
 
 import uvicorn
-from fastapi import FastAPI, Request, Response, APIRouter
+from fastapi import FastAPI, APIRouter
+from starlette.requests import Request
+from starlette.responses import Response
 
-from core.db import database
 from core.config import settings
+from core.db import database
 from src.users.api import users_app
 from src.video.api import video_app
 
 
 logging.basicConfig(level=logging.DEBUG, format='DateTime: %(asctime)s :: %(levelname)s :: Msg --> %(message)s')
-
 
 app = FastAPI()
 
@@ -20,6 +21,7 @@ async def db_session_middleware(request: Request, call_next):
     response = Response('Internal server error', status_code=500)
 
     try:
+        print('!@!@!@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@MIDDLEWARE')
         request.state.db = database()
         response = await call_next(request)
     finally:

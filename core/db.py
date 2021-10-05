@@ -1,9 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext import declarative
 from sqlalchemy.orm import sessionmaker
-from starlette.requests import Request
+from fastapi.requests import Request
 
-engine = create_engine('postgresql://postgres:pavel@localhost/video_hosting')
+database_url = 'postgresql://postgres:pavel@localhost/video_hosting'
+
+engine = create_engine(database_url)
 
 database = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
