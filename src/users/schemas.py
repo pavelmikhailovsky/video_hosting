@@ -1,7 +1,7 @@
 import typing as t
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class User(BaseModel):
@@ -18,6 +18,7 @@ class User(BaseModel):
 class UserInDB(BaseModel):
     username: str
     password: str
+    email: t.Optional[EmailStr] = None
 
     class Config:
         orm_mode = True
@@ -32,3 +33,4 @@ class UserUpdate(BaseModel):
     new_username: t.Optional[str]
     current_password: t.Optional[str]
     new_password: t.Optional[str]
+    email: t.Optional[EmailStr]

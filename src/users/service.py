@@ -80,6 +80,9 @@ class UpdateUser:
                 )
             result.update(self.new_password(user))
 
+        if self.data.email:
+            result.update(self.update_email(user))
+
         return result
 
     def new_username(self, user):
@@ -98,6 +101,9 @@ class UpdateUser:
         user.password = hashed_password
         self.db.commit()
         return {'password': 'is changed'}
+
+    def update_email(self, user):
+        ...
 
 
 
