@@ -29,7 +29,13 @@ async def create_user(data: schemas.UserInDB = Depends(), db: Session = Depends(
 async def update_user(db: Session = Depends(get_db),
                       data: schemas.UserUpdate = Depends(),
                       token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
-    return service.UpdateUser(db, data, token).returning_result()
+    return await service.UpdateUser(db, data, token).returning_result()
+
+
+@users_app.get('/email_confirmation')
+async def email_confirmation(db: Session = Depends(get_db),
+                             token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
+    return await service.email_confirmation(db, token)
 
 
 @users_app.get('/{user_id}', response_model=schemas.User)
@@ -37,3 +43,10 @@ async def get_user_by_id(user_id: int,
                          db: Session = Depends(get_db),
                          token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
     return service.user_by_id(db, user_id, token)
+
+
+@users_app.post('/email_confirmation/{number_confirmation}')
+async def examination_number(number_confiramtion: int,
+                             db: Session = Depends(get_db),
+                             token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
+    return service.examination_number_email(number_confiramtion, db, token)

@@ -11,3 +11,5 @@ media
 .coverage
 
 .pytest_cache
+
+.vscode

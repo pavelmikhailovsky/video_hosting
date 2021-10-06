@@ -21,7 +21,6 @@ async def db_session_middleware(request: Request, call_next):
     response = Response('Internal server error', status_code=500)
 
     try:
-        print('!@!@!@!@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@MIDDLEWARE')
         request.state.db = database()
         response = await call_next(request)
     finally:
@@ -38,4 +37,4 @@ app.include_router(routers)
 
 
 if __name__ == '__main__':
-    uvicorn.run('main:app', host='127.0.0.1', port=8001, reload=True)
+    uvicorn.run('main:app', host=settings.HOST, port=settings.PORT, reload=True)

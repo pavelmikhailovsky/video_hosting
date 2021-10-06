@@ -4,12 +4,14 @@ import typing as t
 
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi_mail import FastMail, MessageSchema
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from starlette import status
 
 from . import auth, schemas
 from .models import User
+from core.config import template_email, conf_email, number_for_confirmation
 
 
 def access_token(db: Session, data: schemas.UserTokenLogin):
@@ -57,7 +59,46 @@ def create_user(db: Session, data: schemas.UserInDB):
 
 def user_by_id(db: Session, user_id: int, token: HTTPAuthorizationCredentials):
     _ = get_current_user(db, token)
-    return db.query(User).filter(User.id == user_id).first()  # TODO find other solution
+    return db.query(User).filter(User.id == user_id).first()
+
+
+def examination_number_email(number_confiramtion: int, db: Session, token: HTTPAuthorizationCredentials):
+    user = get_current_user(db, token)
+    if not user.email_confirmation:
+        if number_confiramtion == number_for_confirmation:
+            user.email_confirmation = True
+            db.commit()
+            return {'status': 'Email address is confirmation'}
+        raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f'Number for confirmation is not valid'
+                )
+    if number_confiramtion == number_for_confirmation:
+        user.email_confirmation = False
+        db.commit()
+        return {'status': 'Email addres now is not confirmationed'}
+    raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f'Number for confirmation is not valid'
+            )
+
+
+async def email_confirmation(db: Session, token: HTTPAuthorizationCredentials):
+    user = get_current_user(db, token)
+    if user.email:
+        message = MessageSchema(
+            subject='Video hosting',
+            recipients=[user.email,],
+            body=template_email,
+            subtype='plain'
+        )
+        fm = FastMail(conf_email)
+        await fm.send_message(message)
+        return {'email': 'Message send'}
+    raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f'User does not have email'
+            )
 
 
 class UpdateUser:
@@ -66,7 +107,7 @@ class UpdateUser:
         self.data = data
         self.token = token
 
-    def returning_result(self):
+    async def returning_result(self):
         result = {}
         user = get_current_user(self.db, self.token)
         if self.data.new_username:
@@ -81,12 +122,13 @@ class UpdateUser:
             result.update(self.new_password(user))
 
         if self.data.email:
-            result.update(self.update_email(user))
+            result_change = await self.change_email(user)
+            result.update(result_change)
 
         return result
 
     def new_username(self, user):
-        unique_username = self.db.query(User).filter(User.username == self.data.new_username).first()  # TODO find other solution
+        unique_username = self.db.query(User).filter(User.username == self.data.new_username).first()
         if unique_username:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,8 +144,12 @@ class UpdateUser:
         self.db.commit()
         return {'password': 'is changed'}
 
-    def update_email(self, user):
-        ...
+    async def change_email(self, user):
+        if not user.email_confirmation:
+            user.email = self.data.email
+            self.db.commit()
+            return await email_confirmation(self.db, self.token)
+        return await email_confirmation(self.db, self.token)
 
 
 
