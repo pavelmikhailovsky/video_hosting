@@ -1,3 +1,5 @@
+import os
+
 from random import randint
 
 from pydantic import BaseSettings
@@ -13,11 +15,11 @@ class Settings(BaseSettings):
 settings = Settings()
 
 conf_email = ConnectionConfig(
-    MAIL_USERNAME = "fastapi.test.send.email",
-    MAIL_PASSWORD = "FastapiTest1",
-    MAIL_FROM = "fastapi.test.send.email@gmail.com",
-    MAIL_PORT = 587,
-    MAIL_SERVER = "smtp.gmail.com",
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME'),
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD'),
+    MAIL_FROM = os.getenv('MAIL_FROM'),
+    MAIL_PORT = os.getenv('MAIL_PORT'),
+    MAIL_SERVER = os.getenv('MAIL_SERVER'),
     MAIL_FROM_NAME="Confirmation email address",
     MAIL_TLS = True,
     MAIL_SSL = False,
@@ -25,6 +27,7 @@ conf_email = ConnectionConfig(
     VALIDATE_CERTS = True
 )
 
+# number from email message
 number_for_confirmation = randint(1, 1000000)
 
 template_email = f'You code for confirmation email address {number_for_confirmation}'

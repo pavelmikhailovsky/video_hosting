@@ -15,6 +15,7 @@ class User(Base):
     email = Column(String)
     create_at = Column(DateTime(timezone=True), server_default=func.now())
     email_confirmation = Column(Boolean, server_default='f')
+    phone_number = Column(String)
     is_staff = Column(Boolean, server_default='f')
     is_active = Column(Boolean, server_default='t')
     video_path = Column(String, server_default='')

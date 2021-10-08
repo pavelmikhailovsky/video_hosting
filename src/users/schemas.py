@@ -1,7 +1,18 @@
 import typing as t
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator, ValidationError
+
+
+class BaseUserUpdateOrDB(BaseModel):
+    email: t.Optional[EmailStr]
+    phone_number: t.Optional[str]
+
+    @validator('phone_number')
+    def phone_number(cls, value):
+        if not value[0] == '+':
+            raise ValidationError('Phone number is not correct')
+        return value
 
 
 class User(BaseModel):
@@ -15,10 +26,9 @@ class User(BaseModel):
         orm_mode = True
 
 
-class UserInDB(BaseModel):
+class UserInDB(BaseUserUpdateOrDB):
     username: str
     password: str
-    email: t.Optional[EmailStr] = None
 
     class Config:
         orm_mode = True
@@ -29,8 +39,7 @@ class UserTokenLogin(BaseModel):
     password: str
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(BaseUserUpdateOrDB):
     new_username: t.Optional[str]
     current_password: t.Optional[str]
     new_password: t.Optional[str]
-    email: t.Optional[EmailStr]
