@@ -11,8 +11,8 @@ from starlette import status
 
 from . import auth, schemas
 from .models import User
-from core.config import template_email, conf_email, number_for_confirmation
-
+from core.config import (template_email, conf_email, number_for_confirmation_email,
+                        client, phone, number_for_confirmation_phone,)
 
 def access_token(db: Session, data: schemas.UserTokenLogin):
     user = auth.authentication_user(db, data.username, data.password)
@@ -62,27 +62,6 @@ def user_by_id(db: Session, user_id: int, token: HTTPAuthorizationCredentials):
     return db.query(User).filter(User.id == user_id).first()
 
 
-def examination_number_email(number_confiramtion: int, db: Session, token: HTTPAuthorizationCredentials):
-    user = get_current_user(db, token)
-    if not user.email_confirmation:
-        if number_confiramtion == number_for_confirmation:
-            user.email_confirmation = True
-            db.commit()
-            return {'status': 'Email address is confirmation'}
-        raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f'Number for confirmation is not valid'
-                )
-    if number_confiramtion == number_for_confirmation:
-        user.email_confirmation = False
-        db.commit()
-        return {'status': 'Email addres now is not confirmationed'}
-    raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f'Number for confirmation is not valid'
-            )
-
-
 async def email_confirmation(db: Session, token: HTTPAuthorizationCredentials):
     user = get_current_user(db, token)
     if user.email:
@@ -100,6 +79,68 @@ async def email_confirmation(db: Session, token: HTTPAuthorizationCredentials):
                 detail=f'User does not have email'
             )
 
+
+def phone_confirmation(db: Session, token: HTTPAuthorizationCredentials):
+    user = get_current_user(db, token)
+    if not user.phone_number:
+        raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f'User does not have phone number'
+            )
+    message = client.messages.create(
+        body=f'You code for confirmation phone number {number_for_confirmation_phone}',
+        from_=phone,
+        to=user.phone_number,
+    )
+    return {'message': message.body}
+
+
+class ExaminationNumber:
+    _exception = HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f'Number for confirmation is not valid'
+                    )
+
+    def __init__(self, action, db, token, number_confirmation):
+        self.action = action
+        self.db = db
+        self.token = token
+        self.number_confirmation = number_confirmation
+        self.user = get_current_user(self.db, self.token)
+
+    def action(self):
+        result = {}
+        if self.action == 'email':
+            result.update(self._examination_number_email())
+        elif self.action == 'phone':
+            result.update(self._examination_phone_number())
+        return result
+
+    def _examination_number_email(self):
+        if not self.user.email_confirmation:
+            if self.number_confirmation == number_for_confirmation_email:
+                self.user.email_confirmation = True
+                self.db.commit()
+                return {'status': 'Email address is confirmation'}
+            raise self._exception
+        if self.number_confirnumber_confirmationamtion == number_for_confirmation_email:
+            self.user.email_confirmation = False
+            self.db.commit()
+            return {'status': 'Email addres now is not confirmationed'}
+        raise self._exception
+
+    def _examination_number_phone(self):
+        if not self.user.phone_number_confirmation:
+            if self.number_confirmation == number_for_confirmation_phone:
+                self.user.phone_number_confirmation = True
+                self.db.commit()
+                return {'status': 'Phone number is confirmation'}
+            raise self._exception
+        if self.number_confirmation == number_for_confirmation_phone:
+            self.user.phone_number_confirmation = False
+            self.db.commit()
+            return {'status': 'Phone number now is not confirmationed'}
+        raise self._exception
 
 class UpdateUser:
     def __init__(self, db: Session, data: schemas.UserUpdate, token: HTTPAuthorizationCredentials):

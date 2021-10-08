@@ -1,7 +1,7 @@
 import logging
 
 import uvicorn
-from dotenv import load_dotenv
+
 from fastapi import FastAPI, APIRouter
 from starlette.requests import Request
 from starlette.responses import Response
@@ -37,5 +37,4 @@ app.include_router(routers)
 
 
 if __name__ == '__main__':
-    load_dotenv()
     uvicorn.run('main:app', host=settings.HOST, port=settings.PORT, reload=True)

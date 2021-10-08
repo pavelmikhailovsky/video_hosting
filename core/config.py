@@ -1,9 +1,13 @@
 import os
 
+from dotenv import load_dotenv
 from random import randint
+from twilio.rest import Client
 
 from pydantic import BaseSettings
 from fastapi_mail import ConnectionConfig
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -27,7 +31,17 @@ conf_email = ConnectionConfig(
     VALIDATE_CERTS = True
 )
 
-# number from email message
-number_for_confirmation = randint(1, 1000000)
+account_sid = os.getenv('TWILIO_ACCOUNT_SID')
+auth_token = os.getenv('TWILIO_AUTH_TOKEN')
+phone = os.getenv('PHONE_NUMBER')
 
-template_email = f'You code for confirmation email address {number_for_confirmation}'
+client = Client(account_sid, auth_token)
+
+# number from email message
+number_for_confirmation_email = randint(1, 1000000)
+
+#number from phone message
+number_for_confirmation_phone = randint(1, 1000000)
+
+
+template_email = f'You code for confirmation email address {number_for_confirmation_email}'

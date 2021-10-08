@@ -38,6 +38,12 @@ async def email_confirmation(db: Session = Depends(get_db),
     return await service.email_confirmation(db, token)
 
 
+@users_app.get('/phone_confirmation')
+async def phone_confirmation(db: Session = Depends(get_db),
+                            token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
+    return service.phone_confirmation(db, token)
+
+
 @users_app.get('/{user_id}', response_model=schemas.User)
 async def get_user_by_id(user_id: int,
                          db: Session = Depends(get_db),
@@ -46,7 +52,14 @@ async def get_user_by_id(user_id: int,
 
 
 @users_app.post('/email_confirmation/{number_confirmation}')
-async def examination_number(number_confiramtion: int,
+async def examination_email_number(number_confiramtion: int,
                              db: Session = Depends(get_db),
                              token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
-    return service.examination_number_email(number_confiramtion, db, token)
+    return service.ExaminationNumber('email', db, token, number_confiramtion).action()
+
+
+@users_app.post('/phone_confirmation/{phone_confirmation}')
+async def examination_phone_number(phone_confiramtion: int,
+                             db: Session = Depends(get_db),
+                             token: HTTPAuthorizationCredentials = Depends(auth.oauth2_scheme)):
+    return service.ExaminationNumber('phone', db, token, phone_confiramtion).action()

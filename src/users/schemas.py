@@ -9,7 +9,7 @@ class BaseUserUpdateOrDB(BaseModel):
     phone_number: t.Optional[str]
 
     @validator('phone_number')
-    def phone_number(cls, value):
+    def validate_phone_number(cls, value):
         if not value[0] == '+':
             raise ValidationError('Phone number is not correct')
         return value
