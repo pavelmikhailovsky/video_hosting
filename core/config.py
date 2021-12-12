@@ -43,5 +43,6 @@ number_for_confirmation_email = randint(1, 1000000)
 #number from phone message
 number_for_confirmation_phone = randint(1, 1000000)
 
+body_message_phone = f'You code for confirmation phone number {number_for_confirmation_phone}'
 
 template_email = f'You code for confirmation email address {number_for_confirmation_email}'

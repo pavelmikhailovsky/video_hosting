@@ -12,7 +12,7 @@ from starlette import status
 from . import auth, schemas
 from .models import User
 from core.config import (template_email, conf_email, number_for_confirmation_email,
-                        client, phone, number_for_confirmation_phone,)
+                        client, phone, number_for_confirmation_phone, body_message_phone,)
 
 def access_token(db: Session, data: schemas.UserTokenLogin):
     user = auth.authentication_user(db, data.username, data.password)
@@ -88,7 +88,7 @@ def phone_confirmation(db: Session, token: HTTPAuthorizationCredentials):
                 detail=f'User does not have phone number'
             )
     message = client.messages.create(
-        body=f'You code for confirmation phone number {number_for_confirmation_phone}',
+        body=body_message_phone,
         from_=phone,
         to=user.phone_number,
     )
@@ -113,7 +113,7 @@ class ExaminationNumber:
         if self.action == 'email':
             result.update(self._examination_number_email())
         elif self.action == 'phone':
-            result.update(self._examination_phone_number())
+            result.update(self._examination_number_phone())
         return result
 
     def _examination_number_email(self):
@@ -123,10 +123,10 @@ class ExaminationNumber:
                 self.db.commit()
                 return {'status': 'Email address is confirmation'}
             raise self._exception
-        if self.number_confirnumber_confirmationamtion == number_for_confirmation_email:
+        if self.number_confirmation == number_for_confirmation_email:
             self.user.email_confirmation = False
             self.db.commit()
-            return {'status': 'Email addres now is not confirmationed'}
+            return {'status': 'Email address now is not confirmationed'}
         raise self._exception
 
     def _examination_number_phone(self):
@@ -141,6 +141,7 @@ class ExaminationNumber:
             self.db.commit()
             return {'status': 'Phone number now is not confirmationed'}
         raise self._exception
+
 
 class UpdateUser:
     def __init__(self, db: Session, data: schemas.UserUpdate, token: HTTPAuthorizationCredentials):
